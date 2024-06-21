@@ -126,6 +126,11 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == REQUEST_IMAGE_CAMERA && resultCode == Activity.RESULT_OK) {
             try {
                 imagenBitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), photoURI);
+                Matrix matrix = new Matrix();
+                matrix.postRotate(90); // Rotar 90 grados
+
+                imagenBitmap = Bitmap.createBitmap(imagenBitmap, 0, 0, imagenBitmap.getWidth(), imagenBitmap.getHeight(), matrix, true);
+
                 verImg.setImageBitmap(imagenBitmap);
             } catch (IOException e) {
                 e.printStackTrace();

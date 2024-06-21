@@ -120,16 +120,26 @@ Java_ups_vision_practica31recfiguras_MainActivity_CalculoMomentos
     int mascara = 5;
     bitmapToMat(env, bitmapIn, src, false);
 //    medianBlur(src,filtro,mascara);
-    Mat gray;
+    Mat gray,edges;;
     cvtColor(src, gray, COLOR_BGR2GRAY);
-
     // Aplicar un filtro gaussiano para reducir el ruido
+
+    double thresh_value = 150; // valor del umbral
+    double max_value = 255;    // valor máximo para el umbral
+    threshold(edges, edges, thresh_value, max_value, THRESH_BINARY);
     GaussianBlur(gray, gray, Size(5, 5), 0);
-
-    // Aplicar el detector de bordes de Canny
-    Mat edges;
+//
     Canny(gray, edges, 50, 150, 3);
+//
+    int morph_size = 2;
+    Mat element = getStructuringElement(MORPH_RECT,
+                                        Size(2 * morph_size + 1, 2 * morph_size + 1),
+                                        Point(morph_size, morph_size));
 
+
+    dilate(edges,edges,element);
+//
+//
     // Encontrar los contornos
     vector<vector<Point>> contours;
     findContours(edges, contours, RETR_TREE, CHAIN_APPROX_SIMPLE);
@@ -143,14 +153,18 @@ Java_ups_vision_practica31recfiguras_MainActivity_CalculoMomentos
         // Aproximar el contorno
         vector<Point> approx;
         approxPolyDP(contours[i], approx, arcLength(contours[i], true) * 0.04, true);
-
+        Mat mask = Mat::zeros(src.rows + 2, src.cols + 2, CV_8UC1);
         // Asegurarse de que el contorno sea convexo
         if (!isContourConvex(approx))
             continue;
 
         // Dibujar los contornos
-        drawContours(src, contours, (int) i, Scalar(0, 255, 0), 2, LINE_8);
+        drawContours(edges, contours, (int) i, Scalar(0, 255, 0), 2, LINE_8);
 
+        // Rellenar la figura usando floodFill
+
+        Point seed = contours[i][0];
+        floodFill(edges, mask, seed, Scalar(0, 0, 255), 0, Scalar(10, 10, 10), Scalar(10, 10, 10));
         // Determinar la figura según el número de vértices
         if (approx.size() == 3) {
             putText(src, "Triangulo", approx[0], FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255, 0, 0), 2);
@@ -159,15 +173,18 @@ Java_ups_vision_practica31recfiguras_MainActivity_CalculoMomentos
             Rect boundingBox = boundingRect(contours[i]);
             float aspectRatio = (float) boundingBox.width / (float) boundingBox.height;
             if (aspectRatio >= 0.9 && aspectRatio <= 1.1) {
-                putText(src, "Cuadrado", approx[0], FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255, 0, 0),
+                putText(edges, "Cuadrado", approx[0], FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255, 0, 0),
                         2);
                  } else {
-                     putText(src, "Rectangulo", approx[0], FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255, 0, 0), 2);
+                     putText(edges, "Rectangulo", approx[0], FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255, 0, 0), 2);
                  }
             } else if (approx.size() > 4) {
                 // Asumir que es un círculo si tiene muchos vértices
-                putText(src, "Circulo", approx[0], FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255, 0, 0), 2);
+                putText(edges, "Circulo", approx[0], FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255, 0, 0), 2);
             }
+        else {
+            putText(edges, "No se reconoce", approx[0], FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255, 0, 0), 2);
         }
-        matToBitmap(env, src, bitmapOut, false);
+        }
+        matToBitmap(env, edges, bitmapOut, false);
     }
