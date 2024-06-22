@@ -119,72 +119,102 @@ Java_ups_vision_practica31recfiguras_MainActivity_CalculoMomentos
     Mat src, filtro;
     int mascara = 5;
     bitmapToMat(env, bitmapIn, src, false);
-//    medianBlur(src,filtro,mascara);
-    Mat gray,edges;;
+
+    Mat gray, edges, imagen;
+    string shape;
+    vector<Point> approx;
+
     cvtColor(src, gray, COLOR_BGR2GRAY);
+
     // Aplicar un filtro gaussiano para reducir el ruido
-
-    double thresh_value = 150; // valor del umbral
-    double max_value = 255;    // valor máximo para el umbral
-    threshold(edges, edges, thresh_value, max_value, THRESH_BINARY);
     GaussianBlur(gray, gray, Size(5, 5), 0);
-//
+
+    // Detectar bordes usando Canny
     Canny(gray, edges, 50, 150, 3);
-//
-    int morph_size = 2;
-    Mat element = getStructuringElement(MORPH_RECT,
-                                        Size(2 * morph_size + 1, 2 * morph_size + 1),
-                                        Point(morph_size, morph_size));
 
+    // Binarizar la imagen
+    double thresh_value = 150; // Valor del umbral
+    double max_value = 255;    // Valor máximo para el umbral
+    threshold(edges, edges, thresh_value, max_value, THRESH_BINARY);
+    // Crear una imagen para mostrar el resultado final
+    Mat result = Mat::zeros(edges.size(), CV_8UC1);
 
-    dilate(edges,edges,element);
-//
-//
-    // Encontrar los contornos
     vector<vector<Point>> contours;
-    findContours(edges, contours, RETR_TREE, CHAIN_APPROX_SIMPLE);
+    vector<Vec4i> hierarchy;
+    findContours(edges, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE);
 
-    // Recorrer cada contorno y determinar la figura
+    // Recorrer cada contorno
     for (size_t i = 0; i < contours.size(); i++) {
         // Filtrar contornos pequeños
         if (contourArea(contours[i]) < 100)
             continue;
 
         // Aproximar el contorno
-        vector<Point> approx;
+
         approxPolyDP(contours[i], approx, arcLength(contours[i], true) * 0.04, true);
-        Mat mask = Mat::zeros(src.rows + 2, src.cols + 2, CV_8UC1);
-        // Asegurarse de que el contorno sea convexo
-        if (!isContourConvex(approx))
-            continue;
 
-        // Dibujar los contornos
-        drawContours(edges, contours, (int) i, Scalar(0, 255, 0), 2, LINE_8);
+        // Rellenar el contorno con blanco en la imagen resultante
+        drawContours(result, vector<vector<Point>>{approx}, -1, Scalar(255), FILLED, LINE_8);
 
-        // Rellenar la figura usando floodFill
+        result.copyTo(imagen);
 
-        Point seed = contours[i][0];
-        floodFill(edges, mask, seed, Scalar(0, 0, 255), 0, Scalar(10, 10, 10), Scalar(10, 10, 10));
-        // Determinar la figura según el número de vértices
+        // Identificar la forma en base al número de vértices del contorno aproximado
+
         if (approx.size() == 3) {
-            putText(src, "Triangulo", approx[0], FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255, 0, 0), 2);
+            // Verificar si los ángulos son aproximadamente iguales
+            vector<double> angles;
+            for (int j = 0; j < 3; j++) {
+                Point pt1 = approx[j];
+                Point pt2 = approx[(j + 1) % 3];
+                Point pt3 = approx[(j + 2) % 3];
+
+                double angle = abs(atan2(pt3.y - pt2.y, pt3.x - pt2.x) - atan2(pt1.y - pt2.y, pt1.x - pt2.x)) * 180 / CV_PI;
+                if (angle > 180)
+                    angle = 360 - angle;
+                angles.push_back(angle);
+            }
+
+            bool isTriangle = true;
+            for (double angle : angles) {
+                if (angle < 20 || angle > 160) {
+                    isTriangle = false;
+                    break;
+                }
+            }
+
+            if (isTriangle) {
+                shape = "Triangulo";
+            }
+            // else {
+            //     shape = "Desconocido";
+            // }
         } else if (approx.size() == 4) {
             // Verificar si es un cuadrado o un rectángulo
-            Rect boundingBox = boundingRect(contours[i]);
-            float aspectRatio = (float) boundingBox.width / (float) boundingBox.height;
-            if (aspectRatio >= 0.9 && aspectRatio <= 1.1) {
-                putText(edges, "Cuadrado", approx[0], FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255, 0, 0),
-                        2);
-                 } else {
-                     putText(edges, "Rectangulo", approx[0], FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255, 0, 0), 2);
-                 }
-            } else if (approx.size() > 4) {
-                // Asumir que es un círculo si tiene muchos vértices
-                putText(edges, "Circulo", approx[0], FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255, 0, 0), 2);
+            Rect boundingBox = boundingRect(approx);
+            float aspectRatio = (float)boundingBox.width / (float)boundingBox.height;
+            if (aspectRatio >= 0.8 && aspectRatio <= 1.2) {
+                shape = "Cuadrado";
+            } else {
+                shape = "Rectangulo";
             }
-        else {
-            putText(edges, "No se reconoce", approx[0], FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255, 0, 0), 2);
+        } else {
+            // Usar el área y el perímetro para determinar si es un círculo
+            double area = contourArea(contours[i]);
+            double perimeter = arcLength(contours[i], true);
+            double circularity = 4 * CV_PI * (area / (perimeter * perimeter));
+            if (circularity > 0.7) {
+                shape = "Circulo";
+            }
+            //  else {
+            //     shape = "Desconocido";
+            // }
         }
-        }
-        matToBitmap(env, edges, bitmapOut, false);
+
+        // Poner texto en la imagen original para mostrar la forma detectada
+
+    }
+    putText(src, shape, approx[0], FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 0), 1);
+
+    // Convertir el Mat resultante a bitmap de salida
+    matToBitmap(env, src, bitmapOut, false);
     }
