@@ -46,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_IMAGE_CAPTURE = 1;
     private static final int REQUEST_CAMERA_PERMISSION = 100;
-    private ImageView verImg;
+    private ImageView verImgOriginal,verImg;
     private Uri photoURI;
     private ActivityMainBinding binding;
     private Bitmap imagenBitmap, outputBitmap;;
@@ -62,6 +62,7 @@ public class MainActivity extends AppCompatActivity {
         Button btnCalHu = findViewById(R.id.btnCalHu);
         TextView txtTipo = findViewById(R.id.tipo);
         verImg= findViewById(R.id.imgViewCamara);
+        verImgOriginal=findViewById(R.id.imgOriginal);
 //        btnCamera.setOnClickListener(new View.OnClickListener() {
 //            @Override
 //            public void onClick(View v) {
@@ -103,7 +104,7 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             Bundle extras = data.getExtras();
             imagenBitmap = (Bitmap) extras.get("data");
-            verImg.setImageBitmap(imagenBitmap);
+            verImgOriginal.setImageBitmap(imagenBitmap);
         }
     }
     @Override

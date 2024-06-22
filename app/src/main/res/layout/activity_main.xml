@@ -17,6 +17,31 @@
         app:layout_constraintTop_toBottomOf="@+id/imgViewCamara"
         app:layout_constraintVertical_bias="0.063" />
 
+    <ImageView
+        android:id="@+id/imgOriginal"
+        android:layout_width="252dp"
+        android:layout_height="194dp"
+        android:layout_marginTop="12dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.496"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView2"
+        app:layout_constraintVertical_bias="0.0"
+        tools:srcCompat="@tools:sample/avatars" />
+
+    <ImageView
+        android:id="@+id/imgViewCamara"
+        android:layout_width="254dp"
+        android:layout_height="209dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.49"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imgOriginal"
+        app:layout_constraintVertical_bias="0.164"
+        tools:srcCompat="@tools:sample/avatars" />
+
     <Button
         android:id="@+id/btnCamara"
         android:layout_width="wrap_content"
@@ -24,10 +49,10 @@
         android:text="Camara"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.179"
+        app:layout_constraintHorizontal_bias="0.185"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.756" />
+        app:layout_constraintTop_toBottomOf="@+id/imgViewCamara"
+        app:layout_constraintVertical_bias="0.344" />
 
     <Button
         android:id="@+id/btnCalHu"
@@ -36,21 +61,29 @@
         android:text="Momento HU"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.894"
+        app:layout_constraintHorizontal_bias="0.857"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.756" />
+        app:layout_constraintTop_toBottomOf="@+id/imgViewCamara"
+        app:layout_constraintVertical_bias="0.344" />
 
-    <ImageView
-        android:id="@+id/imgViewCamara"
-        android:layout_width="328dp"
-        android:layout_height="304dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Imagen Original"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.493"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.147"
-        tools:srcCompat="@tools:sample/avatars" />
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Imagen Procesada"
+        app:layout_constraintBottom_toTopOf="@+id/imgViewCamara"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imgOriginal" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

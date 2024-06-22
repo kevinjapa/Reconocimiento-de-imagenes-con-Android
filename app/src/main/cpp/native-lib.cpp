@@ -175,7 +175,7 @@ Java_ups_vision_practica31recfiguras_MainActivity_CalculoMomentos
     bitmapToMat(env, bitmapIn, src, false);
 
     Mat gray, edges, imagen;
-    String shape;
+    String tipo;
     vector<Point> approx;
 
     cvtColor(src, gray, COLOR_BGR2GRAY);
@@ -242,7 +242,6 @@ Java_ups_vision_practica31recfiguras_MainActivity_CalculoMomentos
                     angle = 360 - angle;
                 angles.push_back(angle);
             }
-
             bool isTriangle = true;
             for (double angle : angles) {
                 if (angle < 20 || angle > 160) {
@@ -250,18 +249,17 @@ Java_ups_vision_practica31recfiguras_MainActivity_CalculoMomentos
                     break;
                 }
             }
-
             if (isTriangle) {
-                shape = "Triangulo";
+                tipo = "Triangulo";
             }
         } else if (approx.size() == 4) {
             // Verificar si es un cuadrado o un rectángulo
             Rect boundingBox = boundingRect(approx);
             float aspectRatio = (float)boundingBox.width / (float)boundingBox.height;
             if (aspectRatio >= 0.8 && aspectRatio <= 1.2) {
-                shape = "Cuadrado";
+                tipo = "Cuadrado";
             } else {
-                shape = "Rectangulo";
+                tipo = "Rectangulo";
             }
         } else {
             // Usar el área y el perímetro para determinar si es un círculo
@@ -269,22 +267,35 @@ Java_ups_vision_practica31recfiguras_MainActivity_CalculoMomentos
             double perimeter = arcLength(contours[i], true);
             double circularity = 4 * CV_PI * (area / (perimeter * perimeter));
             if (circularity > 0.7) {
-                shape = "Circulo";
+                tipo = "Circulo";
             }
               else {
-                 shape = "Desconocido";
+                 tipo = "Desconocido";
              }
         }
-
-        // Poner texto en la imagen original para mostrar la forma detectada
-
     }
 //    putText(edges, shape, approx[0], FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255, 255, 255), 1);
-    //resultStr=shape;
-    // Convertir el Mat resultante a bitmap de salida
-//    matToBitmap(env, src, bitmapOut, false);
     matToBitmap(env, result2, bitmapOut, false);
 
-    std::string hello = shape;
+    std::string hello = tipo;
+    return env->NewStringUTF(hello.c_str());
+}
+
+extern "C"
+JNIEXPORT jstring JNICALL
+Java_ups_vision_practica31recfiguras_MainActivity_CalculoMomentosHU
+                (JNIEnv* env,
+                 jobject /*this*/,
+                 jobject bitmapIn,
+                 jobject bitmapOut) {
+    double momentosHuBase[7] = {0.278654,0.00471249,0.000578773,0.00138675,1.16567e-06,2.2131e-05,4.29781e-07};
+    double distanciaEuclidea(double momentosHu[7]){
+        double suma = 0;
+        for(int i=0;i<7;i++){
+            suma+=((momentosHuBase[i]-momentosHu[i])*(momentosHuBase[i]-momentosHu[i]));
+        }
+        return sqrt(suma);
+    }
+    std::string hello = "tipo";
     return env->NewStringUTF(hello.c_str());
 }
