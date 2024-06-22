@@ -197,6 +197,23 @@ Java_ups_vision_practica31recfiguras_MainActivity_CalculoMomentos
     vector<Vec4i> hierarchy;
     findContours(edges, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE);
 
+    //
+    Mat result2 = Mat::zeros(edges.size(), CV_8UC1);
+
+    vector<vector<Point>> contours2;
+    vector<Vec4i> hierarchy2;
+    findContours(edges, contours2, hierarchy2, RETR_TREE, CHAIN_APPROX_SIMPLE);
+
+    // Rellenar el interior del contorno con color blanco
+    for (size_t i = 0; i < contours2.size(); i++) {
+        // Filtrar contornos pequeños
+        if (contourArea(contours2[i]) < 100)
+            continue;
+
+        // Rellenar el contorno con blanco en la imagen resultante
+        drawContours(result2, contours2, (int)i, Scalar(255), FILLED, LINE_8);
+    }
+    //
     // Recorrer cada contorno
     for (size_t i = 0; i < contours.size(); i++) {
         // Filtrar contornos pequeños
@@ -209,8 +226,6 @@ Java_ups_vision_practica31recfiguras_MainActivity_CalculoMomentos
 
         // Rellenar el contorno con blanco en la imagen resultante
         drawContours(result, vector<vector<Point>>{approx}, -1, Scalar(255), FILLED, LINE_8);
-
-        result.copyTo(imagen);
 
         // Identificar la forma en base al número de vértices del contorno aproximado
 
@@ -268,7 +283,7 @@ Java_ups_vision_practica31recfiguras_MainActivity_CalculoMomentos
     //resultStr=shape;
     // Convertir el Mat resultante a bitmap de salida
 //    matToBitmap(env, src, bitmapOut, false);
-    matToBitmap(env, edges, bitmapOut, false);
+    matToBitmap(env, result2, bitmapOut, false);
 
     std::string hello = shape;
     return env->NewStringUTF(hello.c_str());
