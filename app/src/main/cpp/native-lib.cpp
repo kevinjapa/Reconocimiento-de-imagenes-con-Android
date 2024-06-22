@@ -109,8 +109,62 @@ void matToBitmap(JNIEnv * env, cv::Mat src, jobject bitmap, jboolean needPremult
     }
 }
 
+void matToBitmapString(JNIEnv* env, cv::Mat src, jobject bitmap, jboolean needPremultiplyAlpha, std::string& result) {
+    AndroidBitmapInfo info;
+    void* pixels = nullptr;
+    try {
+        CV_Assert(AndroidBitmap_getInfo(env, bitmap, &info) >= 0);
+        CV_Assert(info.format == ANDROID_BITMAP_FORMAT_RGBA_8888 || info.format == ANDROID_BITMAP_FORMAT_RGB_565);
+        CV_Assert(src.dims == 2 && info.height == (uint32_t)src.rows && info.width == (uint32_t)src.cols);
+        CV_Assert(src.type() == CV_8UC1 || src.type() == CV_8UC3 || src.type() == CV_8UC4);
+        CV_Assert(AndroidBitmap_lockPixels(env, bitmap, &pixels) >= 0);
+        CV_Assert(pixels);
+
+        if (info.format == ANDROID_BITMAP_FORMAT_RGBA_8888) {
+            cv::Mat tmp(info.height, info.width, CV_8UC4, pixels);
+            if (src.type() == CV_8UC1) {
+                cv::cvtColor(src, tmp, cv::COLOR_GRAY2RGBA);
+            } else if (src.type() == CV_8UC3) {
+                cv::cvtColor(src, tmp, cv::COLOR_RGB2RGBA);
+            } else if (src.type() == CV_8UC4) {
+                if (needPremultiplyAlpha) {
+                    cv::cvtColor(src, tmp, cv::COLOR_RGBA2mRGBA);
+                } else {
+                    src.copyTo(tmp);
+                }
+            }
+        } else {
+            cv::Mat tmp(info.height, info.width, CV_8UC2, pixels);
+            if (src.type() == CV_8UC1) {
+                cv::cvtColor(src, tmp, cv::COLOR_GRAY2BGR565);
+            } else if (src.type() == CV_8UC3) {
+                cv::cvtColor(src, tmp, cv::COLOR_RGB2BGR565);
+            } else if (src.type() == CV_8UC4) {
+                cv::cvtColor(src, tmp, cv::COLOR_RGBA2BGR565);
+            }
+        }
+
+        AndroidBitmap_unlockPixels(env, bitmap);
+        result = "Conversion successful";
+        return;
+    } catch (const cv::Exception& e) {
+        AndroidBitmap_unlockPixels(env, bitmap);
+        jclass je = env->FindClass("java/lang/Exception");
+        env->ThrowNew(je, e.what());
+        result = "cv::Exception: " + std::string(e.what());
+        return;
+    } catch (...) {
+        AndroidBitmap_unlockPixels(env, bitmap);
+        jclass je = env->FindClass("java/lang/Exception");
+        env->ThrowNew(je, "Unknown exception in JNI code {matToBitmap}");
+        result = "Unknown exception in JNI code {matToBitmap}";
+        return;
+    }
+}
+
+
 extern "C"
-JNIEXPORT void JNICALL
+JNIEXPORT jstring JNICALL
 Java_ups_vision_practica31recfiguras_MainActivity_CalculoMomentos
         (JNIEnv* env,
          jobject /*this*/,
@@ -121,7 +175,7 @@ Java_ups_vision_practica31recfiguras_MainActivity_CalculoMomentos
     bitmapToMat(env, bitmapIn, src, false);
 
     Mat gray, edges, imagen;
-    string shape;
+    String shape;
     vector<Point> approx;
 
     cvtColor(src, gray, COLOR_BGR2GRAY);
@@ -185,9 +239,6 @@ Java_ups_vision_practica31recfiguras_MainActivity_CalculoMomentos
             if (isTriangle) {
                 shape = "Triangulo";
             }
-            // else {
-            //     shape = "Desconocido";
-            // }
         } else if (approx.size() == 4) {
             // Verificar si es un cuadrado o un rectángulo
             Rect boundingBox = boundingRect(approx);
@@ -205,16 +256,20 @@ Java_ups_vision_practica31recfiguras_MainActivity_CalculoMomentos
             if (circularity > 0.7) {
                 shape = "Circulo";
             }
-            //  else {
-            //     shape = "Desconocido";
-            // }
+              else {
+                 shape = "Desconocido";
+             }
         }
 
         // Poner texto en la imagen original para mostrar la forma detectada
 
     }
-    putText(src, shape, approx[0], FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 255, 0), 1);
-
+//    putText(edges, shape, approx[0], FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255, 255, 255), 1);
+    //resultStr=shape;
     // Convertir el Mat resultante a bitmap de salida
-    matToBitmap(env, src, bitmapOut, false);
-    }
+//    matToBitmap(env, src, bitmapOut, false);
+    matToBitmap(env, edges, bitmapOut, false);
+
+    std::string hello = shape;
+    return env->NewStringUTF(hello.c_str());
+}

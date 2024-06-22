@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
     private Uri photoURI;
     private ActivityMainBinding binding;
     private Bitmap imagenBitmap, outputBitmap;;
-
+    String tipo=" ";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
 
         Button btnCamera = findViewById(R.id.btnCamara);
         Button btnCalHu = findViewById(R.id.btnCalHu);
+        TextView txtTipo = findViewById(R.id.tipo);
         verImg= findViewById(R.id.imgViewCamara);
 //        btnCamera.setOnClickListener(new View.OnClickListener() {
 //            @Override
@@ -89,14 +90,12 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 outputBitmap = imagenBitmap.copy(imagenBitmap.getConfig(), true);
-                CalculoMomentos(imagenBitmap,imagenBitmap);
+                tipo=CalculoMomentos(imagenBitmap,outputBitmap);
                 verImg.setImageBitmap(outputBitmap);
+                System.out.println(tipo+" -------------------------------------------");
+                txtTipo.setText("Tipo de Figura: "+tipo);
             }
         });
-
-        // Example of a call to a native method
-        TextView tv = binding.sampleText;
-        tv.setText(stringFromJNI());
     }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -118,6 +117,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
 
 //    private void goToCamera() {
 //        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -187,5 +187,7 @@ public native String stringFromJNI();
             startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
         }
     }
-    private native void CalculoMomentos(android.graphics.Bitmap in, android.graphics.Bitmap out);
+//    private native void CalculoMomentos(android.graphics.Bitmap in, android.graphics.Bitmap out);
+private native String CalculoMomentos(Bitmap in, Bitmap out);
+
 }
