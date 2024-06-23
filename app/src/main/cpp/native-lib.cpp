@@ -165,7 +165,7 @@ void matToBitmapString(JNIEnv* env, cv::Mat src, jobject bitmap, jboolean needPr
 
 extern "C"
 JNIEXPORT jstring JNICALL
-Java_ups_vision_practica31recfiguras_MainActivity_CalculoMomentos
+Java_ups_vision_practica31recfiguras_MainActivity_TipoFigura
         (JNIEnv* env,
          jobject /*this*/,
          jobject bitmapIn,
@@ -277,7 +277,7 @@ Java_ups_vision_practica31recfiguras_MainActivity_CalculoMomentos
 //    putText(edges, shape, approx[0], FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255, 255, 255), 1);
     matToBitmap(env, result2, bitmapOut, false);
 
-    std::string hello = tipo;
+    string hello = "Tipo de Figura: "+tipo;
     return env->NewStringUTF(hello.c_str());
 }
 
@@ -357,7 +357,7 @@ double distanciaEuclidea(double momentosHu[7], double momentosHuBase[7]) {
     return sqrt(suma);
 }
 
-std::string determinarFigura(double momentosHu[7], double area) {
+string determinarFigura(double momentosHu[7], double area) {
     double distTriangle = distanciaEuclidea(momentosHu, momentosHuBaseTriangle);
     double distSquare = distanciaEuclidea(momentosHu, momentosHuBaseSquare);
     double distCircle = distanciaEuclidea(momentosHu, momentosHuBaseCircle);
@@ -383,7 +383,7 @@ Java_ups_vision_practica31recfiguras_MainActivity_CalculoMomentosHU
     Mat src, filtro;
     bitmapToMat(env, bitmapIn, src, false);
     Mat frame = src;
-    std::string tipo;
+    string tipo;
     Mat imgHSV, binaria;
     double Cx = 0, Cy = 0;
     double distancia = 0;
@@ -417,6 +417,75 @@ Java_ups_vision_practica31recfiguras_MainActivity_CalculoMomentosHU
 //    matToBitmap(env, frame, bitmapOut, false);
 
     // Crear la cadena de salida con la información de la figura
-    std::string salida ="Momentos de HU\nM1: "+std::to_string(momentosHu[0])+"\nM2: "+std::to_string(momentosHu[1]) +"\nM3: "+std::to_string(momentosHu[2]) +"\nM4: "+std::to_string(momentosHu[3])+"\nM5: "+std::to_string(momentosHu[4]) +"\nM6: "+std::to_string(momentosHu[5]) +"\nM7: "+std::to_string(momentosHu[6]);
+    string salida ="Momentos de HU\nM1: "+to_string(momentosHu[0])+"\nM2: "+to_string(momentosHu[1]) +"\nM3: "+to_string(momentosHu[2]) +"\nM4: "+to_string(momentosHu[3])+"\nM5: "+to_string(momentosHu[4]) +"\nM6: "+to_string(momentosHu[5]) +"\nM7: "+to_string(momentosHu[6]);
     return env->NewStringUTF(salida.c_str());
 }
+
+
+double factorial(int n) {
+    if (n == 0 || n == 1)
+        return 1.0;
+    double result = 1.0;
+    for (int i = 2; i <= n; ++i)
+        result *= i;
+    return result;
+}
+
+// Función para calcular el polinomio radial de Zernike
+double radialPolynomial(int n, int m, double r) {
+    double radial = 0.0;
+    for (int s = 0; s <= (n - abs(m)) / 2; s++) {
+        double c = pow(-1, s) * factorial(n - s) /
+                   (factorial(s) * factorial((n + abs(m)) / 2 - s) * factorial((n - abs(m)) / 2 - s));
+        radial += c * pow(r, n - 2 * s);
+    }
+    return radial;
+}
+
+// Función para calcular los momentos de Zernike
+complex<double> zernikeMoment(const Mat& img, int n, int m) {
+    double cx = img.cols / 2.0;
+    double cy = img.rows / 2.0;
+    double radius = min(cx, cy);
+
+    complex<double> moment(0.0, 0.0);
+    for (int y = 0; y < img.rows; y++) {
+        for (int x = 0; x < img.cols; x++) {
+            double dx = (x - cx) / radius;
+            double dy = (cy - y) / radius;
+            double r = sqrt(dx * dx + dy * dy);
+            if (r > 1.0)
+                continue;
+            double theta = atan2(dy, dx);
+            double radial = radialPolynomial(n, m, r);
+            complex<double> zernike = radial * exp(complex<double>(0.0, -m * theta));
+            moment += static_cast<double>(img.at<uchar>(y, x)) * zernike; // Convertir a double
+        }
+    }
+
+    double norm_factor = (n + 1) / CV_PI;
+    return moment * norm_factor;
+}
+
+extern "C"
+JNIEXPORT jstring JNICALL
+Java_ups_vision_practica31recfiguras_MainActivity_CalculoMomentosZernike
+        (JNIEnv* env,
+         jobject /*this*/,
+         jobject bitmapIn,
+         jobject bitmapOut) {
+
+    Mat src, filtro;
+    bitmapToMat(env, bitmapIn, src, false);
+
+    // Binarizar la imagen
+    threshold(src, src, 128, 255, THRESH_BINARY);
+
+    // Calcular momentos de Zernike para n = 4, m = 2
+    complex<double> zm = zernikeMoment(src, 4, 2);
+
+    // Crear la cadena de salida con la información de la figura
+    string salida ="Momento de Zernike (4, 2): \n "+to_string(zm.real())+" + "+to_string(zm.imag())+"i" ;
+    return env->NewStringUTF(salida.c_str());
+}
+

@@ -40,17 +40,13 @@ public class MainActivity extends AppCompatActivity {
         System.loadLibrary("practica31recfiguras");
     }
 
-//    private static final int REQUEST_PERMISSION_CAMERA = 101;
-//    private static final int REQUEST_IMAGE_CAMERA = 101;
-//    private static final int REQUEST_PERMISSION_WRITE_EXTERNAL_STORAGE = 2;
-
     private static final int REQUEST_IMAGE_CAPTURE = 1;
     private static final int REQUEST_CAMERA_PERMISSION = 100;
     private ImageView verImgOriginal,verImg;
     private Uri photoURI;
     private ActivityMainBinding binding;
     private Bitmap imagenBitmap, outputBitmap;;
-    String tipo=" ", monhu=" ";
+    String tipo=" ", monhu=" ", monzernikel=" ";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,25 +58,9 @@ public class MainActivity extends AppCompatActivity {
         Button btnCalHu = findViewById(R.id.btnCalHu);
         TextView txtTipo = findViewById(R.id.tipo);
         TextView lblMonHU = findViewById(R.id.lblMomentosHu);
+        TextView lblMonZernikel = findViewById(R.id.lblMonZernike);
         verImg= findViewById(R.id.imgViewCamara);
         verImgOriginal=findViewById(R.id.imgOriginal);
-//        btnCamera.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//                    if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED &&
-//                            ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-//                        goToCamera();
-//                    } else {
-//                        ActivityCompat.requestPermissions(MainActivity.this,
-//                                new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE},
-//                                REQUEST_PERMISSION_CAMERA);
-//                    }
-//                } else {
-//                    goToCamera();
-//                }
-//            }
-//        });
         btnCamera.setOnClickListener(v -> {
             if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA_PERMISSION);
@@ -92,13 +72,13 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 outputBitmap = imagenBitmap.copy(imagenBitmap.getConfig(), true);
-                tipo=CalculoMomentos(imagenBitmap,outputBitmap);
-//                CalculoMomentos(imagenBitmap,outputBitmap);
+                tipo=TipoFigura(imagenBitmap,outputBitmap);
                 monhu=CalculoMomentosHU(outputBitmap,outputBitmap);
+                monzernikel=CalculoMomentosZernike(outputBitmap,outputBitmap);
                 verImg.setImageBitmap(outputBitmap);
-                System.out.println(tipo+" -------------------------------------------");
-                txtTipo.setText("Tipo de Figura: "+tipo);
+                txtTipo.setText(tipo);
                 lblMonHU.setText(monhu);
+                lblMonZernikel.setText(monzernikel);
             }
         });
     }
@@ -122,78 +102,14 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
-
-
-//    private void goToCamera() {
-//        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-//        if (cameraIntent.resolveActivity(getPackageManager()) != null) {
-//            File photoFile = null;
-//            try {
-//                photoFile = createImageFile();
-//            } catch (IOException ex) {
-//                // Error occurred while creating the File
-//                ex.printStackTrace();
-//            }
-//            if (photoFile != null) {
-//                photoURI = FileProvider.getUriForFile(this,
-//                        "com.yourdomain.yourapp.fileprovider",
-//                        photoFile);
-//                cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-//                startActivityForResult(cameraIntent, REQUEST_IMAGE_CAMERA);
-//            }
-//        }
-//    }
-
-//    @Override
-//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-//        if(requestCode == REQUEST_PERMISSION_CAMERA){
-//            if(permissions.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
-//                goToCamera();
-//            }else{
-//                Toast.makeText(this, "You need to enable permissions", Toast.LENGTH_SHORT).show();
-//            }
-//        }
-//        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-//    }
-//
-//    @Override
-//    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-//        if (requestCode == REQUEST_IMAGE_CAMERA && resultCode == Activity.RESULT_OK) {
-//            try {
-//                imagenBitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), photoURI);
-//                Matrix matrix = new Matrix();
-//                matrix.postRotate(90); // Rotar 90 grados
-//
-//                imagenBitmap = Bitmap.createBitmap(imagenBitmap, 0, 0, imagenBitmap.getWidth(), imagenBitmap.getHeight(), matrix, true);
-//
-//                verImg.setImageBitmap(imagenBitmap);
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//        }
-//        super.onActivityResult(requestCode, resultCode, data);
-//    }
-public native String stringFromJNI();
-//    private File createImageFile() throws IOException {
-//        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date());
-//        String imageFileName = "JPEG_" + timeStamp + "_";
-//        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-//        File image = File.createTempFile(
-//                imageFileName,
-//                ".jpg",
-//                storageDir
-//        );
-//        return image;
-//    }
-
     private void openCamera() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
             startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
         }
     }
-//    private native void CalculoMomentos(android.graphics.Bitmap in, android.graphics.Bitmap out);
-private native String CalculoMomentos(Bitmap in, Bitmap out);
+private native String TipoFigura(Bitmap in, Bitmap out);
 private native String CalculoMomentosHU(Bitmap in, Bitmap out);
+private native String CalculoMomentosZernike(Bitmap in, Bitmap out);
 
 }
