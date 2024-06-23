@@ -281,21 +281,142 @@ Java_ups_vision_practica31recfiguras_MainActivity_CalculoMomentos
     return env->NewStringUTF(hello.c_str());
 }
 
+
+//double momentosHuBase[7] = {0.278654,0.00471249,0.000578773,0.00138675,1.16567e-06,2.2131e-05,4.29781e-07};
+//double distanciaEuclidea(double momentosHu[7]){
+//    double suma = 0;
+//    for(int i=0;i<7;i++){
+//        suma+=((momentosHuBase[i]-momentosHu[i])*(momentosHuBase[i]-momentosHu[i]));
+//    }
+//    return sqrt(suma);
+//}
+//
+//extern "C"
+//JNIEXPORT jstring JNICALL
+//Java_ups_vision_practica31recfiguras_MainActivity_CalculoMomentosHU
+//                (JNIEnv* env,
+//                 jobject /*this*/,
+//                 jobject bitmapIn,
+//                 jobject bitmapOut) {
+//    Mat src, filtro;
+//    bitmapToMat(env, bitmapIn, src, false);
+//    Mat frame = src;
+//    String tipo;
+//    Mat imgHSV, binaria;
+//    double Cx = 0, Cy = 0;
+//    double distancia = 0;
+//
+//    Moments momentos;
+//    double momentosHu[7];
+//
+//    // Convertir la imagen de BGR a HSV
+//    cvtColor(frame, imgHSV, COLOR_BGR2HSV);
+//
+//    // Calcular los momentos
+//    momentos = moments(binaria, true);
+//    Cx = momentos.m10 / momentos.m00;
+//    Cy = momentos.m01 / momentos.m00;
+//
+//    if(momentos.m00 > 100){
+////        cout << "Cx: " << Cx << " Cy: " << Cy << " área: " << momentos.m00 << endl;
+//
+//        HuMoments(momentos, momentosHu);
+//        distancia = distanciaEuclidea(momentosHu);
+////        cout << "Distancia: " << distancia << endl;
+//
+//        if(distancia < 0.11){
+//            putText(frame, "cuadrado", Point(Cx, Cy), FONT_HERSHEY_SIMPLEX, 1, Scalar(233, 1, 1), 2);
+//            tipo="cuadrado";
+//        }
+//    }
+//    matToBitmap(env, frame, bitmapOut, false);
+//    //String salida=tipo+"Distancia: "+distancia+"Area: "+ momentos.m00 ;
+//    std::string salida = tipo + " Distancia: " + std::to_string(distancia) + " Area: " + std::to_string(momentos.m00);
+//
+//
+//    std::string hello = salida;
+//    return env->NewStringUTF(hello.c_str());
+//}
+
+
+// Valores de los momentos de Hu promedio para cada categoría
+double momentosHuBaseTriangle[7] = {0.05797532, 0.00445132, 0.01587491, 0.0040534, 0.00141166, 0.00132272, -0.00013352};
+double momentosHuBaseSquare[7] = {0.0774586042, 0.0210825573, 0.0043398799, 0.00310416062, 0.000323355775, 0.00156343498, -0.0000849751092};
+double momentosHuBaseCircle[7] = {0.05911688, 0.01537497, 0.00772469, 0.00786365, 0.00456395, 0.00742623, 0.00020278};
+
+// Umbrales para las áreas de cada figura
+double areaThresholdTriangle[2] = {13000, 18000};  // Intervalo de área típico para triángulos
+double areaThresholdSquare[2] = {9000, 14000};     // Intervalo de área típico para cuadrados
+double areaThresholdCircle[2] = {7000, 15000};     // Intervalo de área típico para círculos
+
+double distanciaEuclidea(double momentosHu[7], double momentosHuBase[7]) {
+    double suma = 0;
+    for (int i = 0; i < 7; i++) {
+        suma += ((momentosHuBase[i] - momentosHu[i]) * (momentosHuBase[i] - momentosHu[i]));
+    }
+    return sqrt(suma);
+}
+
+std::string determinarFigura(double momentosHu[7], double area) {
+    double distTriangle = distanciaEuclidea(momentosHu, momentosHuBaseTriangle);
+    double distSquare = distanciaEuclidea(momentosHu, momentosHuBaseSquare);
+    double distCircle = distanciaEuclidea(momentosHu, momentosHuBaseCircle);
+
+    if (distTriangle < distSquare && distTriangle < distCircle && area >= areaThresholdTriangle[0] && area <= areaThresholdTriangle[1]) {
+        return "triángulo";
+    } else if (distSquare < distTriangle && distSquare < distCircle && area >= areaThresholdSquare[0] && area <= areaThresholdSquare[1]) {
+        return "cuadrado";
+    } else if (distCircle < distTriangle && distCircle < distSquare && area >= areaThresholdCircle[0] && area <= areaThresholdCircle[1]) {
+        return "círculo";
+    } else {
+        return "indeterminado";  // Si no coincide con ninguno de los umbrales
+    }
+}
+
 extern "C"
 JNIEXPORT jstring JNICALL
 Java_ups_vision_practica31recfiguras_MainActivity_CalculoMomentosHU
-                (JNIEnv* env,
-                 jobject /*this*/,
-                 jobject bitmapIn,
-                 jobject bitmapOut) {
-    double momentosHuBase[7] = {0.278654,0.00471249,0.000578773,0.00138675,1.16567e-06,2.2131e-05,4.29781e-07};
-    double distanciaEuclidea(double momentosHu[7]){
-        double suma = 0;
-        for(int i=0;i<7;i++){
-            suma+=((momentosHuBase[i]-momentosHu[i])*(momentosHuBase[i]-momentosHu[i]));
-        }
-        return sqrt(suma);
+        (JNIEnv* env,
+         jobject /*this*/,
+         jobject bitmapIn,
+         jobject bitmapOut) {
+    Mat src, filtro;
+    bitmapToMat(env, bitmapIn, src, false);
+    Mat frame = src;
+    std::string tipo;
+    Mat imgHSV, binaria;
+    double Cx = 0, Cy = 0;
+    double distancia = 0;
+
+    Moments momentos;
+    double momentosHu[7];
+
+    // Convertir la imagen de BGR a HSV
+    cvtColor(frame, imgHSV, COLOR_BGR2HSV);
+
+    // Binarización (por ejemplo, umbralización simple)
+    inRange(imgHSV, Scalar(0, 0, 0), Scalar(180, 255, 30), binaria);
+
+    // Calcular los momentos
+    momentos = moments(binaria, true);
+    Cx = momentos.m10 / momentos.m00;
+    Cy = momentos.m01 / momentos.m00;
+
+    if (momentos.m00 > 100) {
+        // Calcular los momentos de Hu
+        HuMoments(momentos, momentosHu);
+
+        // Determinar el tipo de figura basado en los momentos de Hu y el área
+        tipo = determinarFigura(momentosHu, momentos.m00);
+
+        // Poner el texto en la imagen
+        putText(frame, tipo, Point(Cx, Cy), FONT_HERSHEY_SIMPLEX, 1, Scalar(233, 1, 1), 2);
     }
-    std::string hello = "tipo";
-    return env->NewStringUTF(hello.c_str());
+
+    // Convertir la imagen procesada de nuevo a bitmap
+//    matToBitmap(env, frame, bitmapOut, false);
+
+    // Crear la cadena de salida con la información de la figura
+    std::string salida ="Momentos de HU\nM1: "+std::to_string(momentosHu[0])+"\nM2: "+std::to_string(momentosHu[1]) +"\nM3: "+std::to_string(momentosHu[2]) +"\nM4: "+std::to_string(momentosHu[3])+"\nM5: "+std::to_string(momentosHu[4]) +"\nM6: "+std::to_string(momentosHu[5]) +"\nM7: "+std::to_string(momentosHu[6]);
+    return env->NewStringUTF(salida.c_str());
 }

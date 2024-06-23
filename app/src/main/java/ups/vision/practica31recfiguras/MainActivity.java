@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
     private Uri photoURI;
     private ActivityMainBinding binding;
     private Bitmap imagenBitmap, outputBitmap;;
-    String tipo=" ";
+    String tipo=" ", monhu=" ";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,6 +61,7 @@ public class MainActivity extends AppCompatActivity {
         Button btnCamera = findViewById(R.id.btnCamara);
         Button btnCalHu = findViewById(R.id.btnCalHu);
         TextView txtTipo = findViewById(R.id.tipo);
+        TextView lblMonHU = findViewById(R.id.lblMomentosHu);
         verImg= findViewById(R.id.imgViewCamara);
         verImgOriginal=findViewById(R.id.imgOriginal);
 //        btnCamera.setOnClickListener(new View.OnClickListener() {
@@ -92,9 +93,12 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 outputBitmap = imagenBitmap.copy(imagenBitmap.getConfig(), true);
                 tipo=CalculoMomentos(imagenBitmap,outputBitmap);
+//                CalculoMomentos(imagenBitmap,outputBitmap);
+                monhu=CalculoMomentosHU(outputBitmap,outputBitmap);
                 verImg.setImageBitmap(outputBitmap);
                 System.out.println(tipo+" -------------------------------------------");
                 txtTipo.setText("Tipo de Figura: "+tipo);
+                lblMonHU.setText(monhu);
             }
         });
     }
@@ -190,5 +194,6 @@ public native String stringFromJNI();
     }
 //    private native void CalculoMomentos(android.graphics.Bitmap in, android.graphics.Bitmap out);
 private native String CalculoMomentos(Bitmap in, Bitmap out);
+private native String CalculoMomentosHU(Bitmap in, Bitmap out);
 
 }
