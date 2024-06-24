@@ -18,7 +18,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Practica31RecFiguras"
         tools:targetApi="31">
+        <activity android:name=".Parte2Activity"></activity>
         <activity
+
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>

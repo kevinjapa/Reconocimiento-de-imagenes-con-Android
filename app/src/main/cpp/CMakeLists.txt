@@ -32,6 +32,9 @@ include_directories(/Users/kevinjapa/Documents/OpenCV-android-sdk/sdk/native/jni
 add_library(${CMAKE_PROJECT_NAME} SHARED
         # List C/C++ source files with relative paths to this CMakeLists.txt.
         native-lib.cpp)
+add_library(parte2-lib SHARED
+        parte2.cpp)
+
 find_library(
         jnigraphics-lib jnigraphics
 )

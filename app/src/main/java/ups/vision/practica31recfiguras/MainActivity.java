@@ -1,35 +1,22 @@
 package ups.vision.practica31recfiguras;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.core.content.FileProvider;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.Matrix;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.provider.MediaStore;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import java.io.File;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
 
 import ups.vision.practica31recfiguras.databinding.ActivityMainBinding;
 
@@ -45,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
     private ImageView verImgOriginal,verImg;
     private Uri photoURI;
     private ActivityMainBinding binding;
-    private Bitmap imagenBitmap, outputBitmap;;
+    private Bitmap imagenBitmap, outputBitmap;
     String tipo=" ", monhu=" ", monzernikel=" ";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
 
         Button btnCamera = findViewById(R.id.btnCamara);
         Button btnCalHu = findViewById(R.id.btnCalHu);
+        Button btnTextura= findViewById(R.id.btnTexturas);
         TextView txtTipo = findViewById(R.id.tipo);
         TextView lblMonHU = findViewById(R.id.lblMomentosHu);
         TextView lblMonZernikel = findViewById(R.id.lblMonZernike);
@@ -81,6 +69,16 @@ public class MainActivity extends AppCompatActivity {
                 lblMonZernikel.setText(monzernikel);
             }
         });
+
+        btnTextura.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intentTexturas = new Intent(MainActivity.this, Parte2Activity.class);
+                startActivity(intentTexturas);
+                finish();
+            }
+        });
+
     }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
