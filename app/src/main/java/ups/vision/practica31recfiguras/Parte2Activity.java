@@ -3,6 +3,7 @@ package ups.vision.practica31recfiguras;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -35,9 +36,17 @@ public class Parte2Activity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.parte2);
         verImgOriginal=findViewById(R.id.imgOriginal2);
-        verImgProcesada= findViewById(R.id.imgResultante2);
+//        verImgProcesada= findViewById(R.id.imgResultante2);
         Button btnCamera = findViewById(R.id.btnCamara2);
         Button btnProbar = findViewById(R.id.btnMomentoHU);
+        Button btnModelo = findViewById(R.id.btnModelo);
+        TextView lblprueba = findViewById(R.id.lblprueba);
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
+        }
+
 
         btnCamera.setOnClickListener(v -> {
             if (ContextCompat.checkSelfPermission(Parte2Activity.this, android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
@@ -52,6 +61,13 @@ public class Parte2Activity extends AppCompatActivity {
                 Intent intentHU = new Intent(Parte2Activity.this, MainActivity.class);
                 startActivity(intentHU);
                 finish();
+            }
+        });
+        btnModelo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String resultado=Modelo(imagenBitmap,getAssets());
+                lblprueba.setText(resultado);
             }
         });
     }
@@ -83,4 +99,5 @@ public class Parte2Activity extends AppCompatActivity {
     }
 
     public native String stringFromJNI2();
+    private native String Modelo(Bitmap bitmapIn, AssetManager assetManager);
 }

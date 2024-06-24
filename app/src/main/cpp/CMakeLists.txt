@@ -54,3 +54,11 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
         ${log-lib}
         log
 )
+
+target_link_libraries(parte2-lib
+        android
+        ${OpenCV_LIBS}
+        ${jnigraphics-lib}
+        ${log-lib}
+        log
+)
