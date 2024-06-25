@@ -15,6 +15,8 @@ import android.provider.MediaStore;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
     private Uri photoURI;
     private ActivityMainBinding binding;
     private Bitmap imagenBitmap, outputBitmap;
-    String tipo=" ", monhu=" ", monzernikel=" ";
+    String tipo=" ";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,10 +47,11 @@ public class MainActivity extends AppCompatActivity {
         Button btnCalHu = findViewById(R.id.btnCalHu);
         Button btnTextura= findViewById(R.id.btnTexturas);
         TextView txtTipo = findViewById(R.id.tipo);
-        TextView lblMonHU = findViewById(R.id.lblMomentosHu);
-        TextView lblMonZernikel = findViewById(R.id.lblMonZernike);
         verImg= findViewById(R.id.imgViewCamara);
         verImgOriginal=findViewById(R.id.imgOriginal);
+        RadioGroup grupo0 =findViewById(R.id.metodos);
+        RadioButton opcionHu=findViewById(R.id.radio_hu);
+        RadioButton opcionZernike=findViewById(R.id.radio_zernike);
         btnCamera.setOnClickListener(v -> {
             if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA_PERMISSION);
@@ -60,13 +63,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 outputBitmap = imagenBitmap.copy(imagenBitmap.getConfig(), true);
-                tipo=TipoFigura(imagenBitmap,outputBitmap);
-                monhu=CalculoMomentosHU(outputBitmap,outputBitmap);
-                monzernikel=CalculoMomentosZernike(outputBitmap,outputBitmap);
-                verImg.setImageBitmap(outputBitmap);
-                txtTipo.setText(tipo);
-                lblMonHU.setText(monhu);
-                lblMonZernikel.setText(monzernikel);
+                if (opcionZernike.isChecked()){
+                    txtTipo.setText("PROXIMAMENTE");
+                }
+                else if(opcionHu.isChecked()){
+                    tipo=MomentosHU(imagenBitmap,outputBitmap);
+                    verImg.setImageBitmap(outputBitmap);
+                    txtTipo.setText(tipo);
+                }
             }
         });
 
@@ -106,8 +110,6 @@ public class MainActivity extends AppCompatActivity {
             startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
         }
     }
-private native String TipoFigura(Bitmap in, Bitmap out);
-private native String CalculoMomentosHU(Bitmap in, Bitmap out);
-private native String CalculoMomentosZernike(Bitmap in, Bitmap out);
+private native String MomentosHU(Bitmap in, Bitmap out);
 
 }

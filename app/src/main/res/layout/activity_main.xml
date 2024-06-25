@@ -28,8 +28,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imgViewCamara"
-        app:layout_constraintVertical_bias="0.05" />
+        app:layout_constraintTop_toBottomOf="@+id/metodos"
+        app:layout_constraintVertical_bias="0.041" />
 
     <ImageView
         android:id="@+id/imgOriginal"
@@ -85,43 +85,22 @@
         android:text="Camara"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.16"
+        app:layout_constraintHorizontal_bias="0.217"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imgViewCamara"
-        app:layout_constraintVertical_bias="0.729" />
+        app:layout_constraintVertical_bias="0.727" />
 
     <Button
         android:id="@+id/btnCalHu"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Momento HU"
+        android:layout_width="128dp"
+        android:layout_height="48dp"
+        android:text="Aplicar"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.85"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imgViewCamara"
         app:layout_constraintVertical_bias="0.729" />
-
-    <TextView
-        android:id="@+id/lblMomentosHu"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imgOriginal"
-        app:layout_constraintVertical_bias="0.18" />
-
-    <TextView
-        android:id="@+id/lblMonZernike"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/lblMomentosHu"
-        app:layout_constraintVertical_bias="0.087" />
 
     <Button
         android:id="@+id/btnTexturas"
@@ -134,5 +113,33 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.96" />
+
+    <RadioGroup
+        android:id="@+id/metodos"
+        android:layout_width="164dp"
+        android:layout_height="45dp"
+        android:gravity="center"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imgOriginal"
+        app:layout_constraintVertical_bias="0.022">
+
+        <RadioButton
+            android:id="@+id/radio_hu"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="HU" />
+
+        <RadioButton
+            android:id="@+id/radio_zernike"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="false"
+            android:text="Zernike" />
+    </RadioGroup>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

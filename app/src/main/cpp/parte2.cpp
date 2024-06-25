@@ -127,9 +127,9 @@ int* LBP8(const int* data, int rows, int columns);
 extern "C"
 JNIEXPORT jstring JNICALL
 Java_ups_vision_practica31recfiguras_Parte2Activity_Modelo(JNIEnv* env,
-                                                           jobject /*this*/,
-                                                           jobject bitmapIn,
-                                                           jobject assetManager) {
+                   jobject /*this*/,
+                   jobject bitmapIn,
+                   jobject assetManager) {
 
     Mat src;
     bitmapToMat(env, bitmapIn, src, false);
@@ -190,7 +190,7 @@ Java_ups_vision_practica31recfiguras_Parte2Activity_Modelo(JNIEnv* env,
         return env->NewStringUTF("Error al calcular LBP.");
     }
 
-    std::vector<int> histo(256, 0);
+    vector<int> histo(256, 0);
     for (int i = 0; i < 256; i++) {
         histo[i] = res[i];
     }
@@ -215,7 +215,7 @@ Java_ups_vision_practica31recfiguras_Parte2Activity_Modelo(JNIEnv* env,
     } else {
         resultadoStr = "Clasificación desconocida.";
     }
-
+    resultadoStr=resultadoStr + "/n Descriptor LBP: " ;
     return env->NewStringUTF(resultadoStr.c_str());
 }
 
