@@ -64,7 +64,9 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 outputBitmap = imagenBitmap.copy(imagenBitmap.getConfig(), true);
                 if (opcionZernike.isChecked()){
-                    txtTipo.setText("PROXIMAMENTE");
+                    tipo=MomentosZernike(imagenBitmap,outputBitmap);
+                    verImg.setImageBitmap(outputBitmap);
+                    txtTipo.setText(tipo);
                 }
                 else if(opcionHu.isChecked()){
                     tipo=MomentosHU(imagenBitmap,outputBitmap);
@@ -110,6 +112,7 @@ public class MainActivity extends AppCompatActivity {
             startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
         }
     }
-private native String MomentosHU(Bitmap in, Bitmap out);
+    private native String MomentosHU(Bitmap in, Bitmap out);
+    private native String MomentosZernike(Bitmap in, Bitmap out);
 
 }
